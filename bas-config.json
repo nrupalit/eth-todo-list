@@ -1,0 +1,12 @@
+{
+    "server": {
+      "baseDir": [
+        "./src",
+        "./build/contracts"
+      ],
+      "routes": {
+        "/vendor": "./node_modules"
+      },
+      "content_security_policy": "script-src 'self' 'sha256-ktarjbJmNtF8IylbwgjSQoKrcQSdXJkqf60bj4nusHA='"
+    }
+  }
