@@ -30,22 +30,32 @@ class App extends Component {
     
         const todoListData = TodoList.networks[networkId]
         if(todoListData){
-        const todoList = new web3.eth.Contract(TodoList.abi, todoListData.address)
-        this.setState({ todoList })
-        console.log(todoList);
-        const taskCount = await todoList.methods.taskCount.length
-        for (let i = 1; i <= taskCount; i++){
-            const task = await todoList.methods.tasks(i).call()
-            this.setState({ tasks: task })
-        } 
-        // let createTask = await todoList.methods.createTask(this.state.content).call()
-        // let daiTokenBalance = await daiToken.methods.balanceOf(this.state.account).call()
-        // this.setState({ daiTokenBalance: daiTokenBalance.toString() })
+          const todoList = new web3.eth.Contract(TodoList.abi, todoListData.address)
+          this.setState({ todoList })
+          console.log(todoList);
+          const taskCount = await todoList.methods.taskCount.call()
+          console.log(taskCount);
+          this.setState({taskCount})
+          for (var i = 1; i <= taskCount; i++){
+              const task = await todoList.methods.tasks(i).call()
+              this.setState({ tasks: [...this.state.tasks, task] })
+          } 
+          // console.log(this.state.todoList.methods.tasks(0));
+          // let createTask = await todoList.methods.createTask(this.state.content).call()
+          // let daiTokenBalance = await daiToken.methods.balanceOf(this.state.account).call()
+          // this.setState({ daiTokenBalance: daiTokenBalance.toString() })
         }
         else {
         window.alert('TodoList contract not deployed to detected network')
         }
         this.setState({ loading: false})
+    }
+
+    createTask = (content) => {
+      this.setState({ loading: true })
+      this.state.todoList.methods.createTask(content).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false})
+      })
     }
 
     constructor(props){
@@ -54,13 +64,10 @@ class App extends Component {
             account: '',
             todoList: {},
             loading: true,
-            content: '',
-            tasks: {
-                id: '',
-                content: '',
-                completed: false
-            }
+            taskCount: 0,
+            tasks: []
         }
+        this.createTask = this.createTask.bind(this)
     }
   render() {
     return (
@@ -69,8 +76,10 @@ class App extends Component {
         <div className="container-fluid mt-5">
           <div className="row">
             <main role="main" className="col-lg-12 ml-auto mr-auto">
-                {this.state.loading ? <div>Loading</div> : <Main />}
-                <h1>{this.state.tasks.content}</h1>
+                {this.state.loading ? <div>Loading</div> : <Main 
+                tasks={this.state.tasks}
+                createTask={this.createTask} />}
+                {console.log(this.state.tasks)}
             </main>
           </div>
         </div>
